@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatroom</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+        }
+
+        .message.user {
+            background-color: #DCF8C6;
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            background-color: #E0E0E0;
+            align-self: flex-start;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 10px;
+            background-color: #e5e5e5;
+        }
+
+        .input-container input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            margin-right: 10px;
+        }
+
+        .input-container button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .input-container button:hover {
+            background-color: #45a049;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            background-color: #f1f1f1;
+        }
+
+        .color-settings {
+            margin: 20px;
+            padding: 20px;
+            background-color: #e5e5e5;
+            border-radius: 10px;
+        }
+
+        .color-settings input {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        Chatroom - Welcome, <span id="username"></span>
+    </header>
+
+    <div class="chat-container" id="chatContainer"></div>
+
+    <div class="input-container">
+        <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" />
+        <button id="sendMessageBtn">Send</button>
+    </div>
+
+    <!-- Color Settings Form -->
+    <div class="color-settings">
+        <h3>Customize Your Colors</h3>
+        <input type="color" id="bg_color" value="#ffffff" />
+        <input type="color" id="text_color" value="#000000" />
+        <button id="saveColorsBtn">Save Colors</button>
+    </div>
+
+    <footer>
+        <button id="logoutBtn">Logout</button>
+    </footer>
+
+    <script>
+        // Get user credentials and preferences from localStorage
+        const username = localStorage.getItem('username');
+        const bgColor = localStorage.getItem('bg_color') || '#ffffff';
+        const textColor = localStorage.getItem('text_color') || '#000000';
+
+        // Apply colors to the page
+        document.body.style.backgroundColor = bgColor;
+        document.body.style.color = textColor;
+
+        // Display username
+        document.getElementById('username').textContent = username || 'Guest';
+
+        // Chat message array
+        let messages = JSON.parse(localStorage.getItem('messages')) || [];
+
+        // Display the messages in the chat
+        const chatContainer = document.getElementById('chatContainer');
+        function displayMessages() {
+            chatContainer.innerHTML = '';
+            messages.forEach((message, index) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(message.username === username ? 'user' : 'bot');
+                messageDiv.innerHTML = `<strong>${message.username}:</strong> ${message.message}`;
+                chatContainer.appendChild(messageDiv);
+            });
+        }
+        displayMessages();
+
+        // Send a message
+        document.getElementById('sendMessageBtn').addEventListener('click', () => {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (message) {
+                const newMessage = { username, message };
+                messages.push(newMessage);
+                localStorage.setItem('messages', JSON.stringify(messages));
+                messageInput.value = '';
+                displayMessages();
+            }
+        });
+
+        // Save color settings
+        document.getElementById('saveColorsBtn').addEventListener('click', () => {
+            const newBgColor = document.getElementById('bg_color').value;
+            const newTextColor = document.getElementById('text_color').value;
+            localStorage.setItem('bg_color', newBgColor);
+            localStorage.setItem('text_color', newTextColor);
+            document.body.style.backgroundColor = newBgColor;
+            document.body.style.color = newTextColor;
+        });
+
+        // Logout functionality (clears the username and messages)
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('username');
+            localStorage.removeItem('messages');
+            window.location.reload();
+        });
+
+        // Set username if not already set
+        if (!username) {
+            const user = prompt("Enter your username:");
+            if (user) {
+                localStorage.setItem('username', user);
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
